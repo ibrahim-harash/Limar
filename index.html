@@ -37,7 +37,7 @@
             padding: 25px 15px;
         }
 
-        /* شاشة الترحيب */
+        /* شاشة الترحيب وشريط التحميل */
         .welcome-splash {
             position: fixed;
             inset: 0;
@@ -48,7 +48,8 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            padding: 20px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
         .welcome-splash.hidden {
@@ -64,8 +65,7 @@
             object-fit: cover;
             border: 3px solid #f59e0b;
             box-shadow: 0 0 35px rgba(245, 158, 11, 0.45);
-            margin-bottom: 18px;
-            animation: pulseScale 1.4s ease-in-out infinite alternate;
+            margin-bottom: 16px;
         }
 
         .splash-title {
@@ -80,12 +80,48 @@
         .splash-sub {
             color: var(--text-muted);
             font-size: 15px;
-            margin-top: 6px;
+            margin-top: 4px;
+            margin-bottom: 24px;
         }
 
-        @keyframes pulseScale {
-            from { transform: scale(0.95); }
-            to { transform: scale(1.03); }
+        .loader-wrapper {
+            width: 100%;
+            max-width: 260px;
+            text-align: center;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 8px;
+            direction: ltr;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f59e0b, #ea580c, #ec4899, #38bdf8);
+            background-size: 200% 100%;
+            border-radius: 999px;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+            transition: width 0.05s linear;
+            animation: gradientMove 1.5s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .progress-percent {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fbbf24;
+            font-family: monospace;
         }
 
         .container {
@@ -375,11 +411,17 @@
 </head>
 <body>
 
-    <!-- شاشة الترحيب -->
+    <!-- شاشة الترحيب مع شريط التحميل الملون -->
     <div class="welcome-splash" id="welcomeSplash">
         <img src="lymar.jpg" alt="شعار ليمار" class="splash-logo">
         <div class="splash-title">ليمار</div>
         <div class="splash-sub">أهلاً وسهلاً بكم</div>
+        <div class="loader-wrapper">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-percent" id="progressPercent">0%</div>
+        </div>
     </div>
 
     <div class="container">
@@ -422,7 +464,7 @@
                 <i class="fas fa-wallet"></i>
                 <span>الدفع عبر شام كاش (Sham Cash)</span>
             </div>
-            <div class="sc-name">أحمد أبونقطه</div>
+            <div class="sc-name">أحمد أبو نقطة</div>
             
             <!-- مربع نسخ الـ ID -->
             <div class="sc-code-box">
@@ -459,7 +501,7 @@
             
             <div class="qr-wrapper" id="qrcodeContainer"></div>
             
-            <div class="modal-name">أحمد أبونقطه</div>
+            <div class="modal-name">أحمد أبو نقطة</div>
             <div class="modal-id">3b927b004d77b90f9138f15aea286a2f</div>
             
             <button class="qr-action-btn btn-download-qr" style="width: 100%; padding: 12px;" onclick="downloadQrImage()">
@@ -470,11 +512,25 @@
     </div>
 
     <script>
-        // إخفاء شاشة الترحيب تلقائياً بعد 1.8 ثانية
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('welcomeSplash').classList.add('hidden');
-            }, 1800);
+        // عداد شريط الترحيب الملون
+        window.addEventListener('DOMContentLoaded', () => {
+            const fill = document.getElementById('progressFill');
+            const percentText = document.getElementById('progressPercent');
+            const splash = document.getElementById('welcomeSplash');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                progress += 2;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        splash.classList.add('hidden');
+                    }, 250);
+                }
+                fill.style.width = progress + '%';
+                percentText.innerText = progress + '%';
+            }, 30);
         });
 
         const shamCashId = "3b927b004d77b90f9138f15aea286a2f";
